@@ -1,0 +1,61 @@
+import React, { useState, useEffect } from 'react';
+import { RobotVisualizer } from './components/RobotVisualizer';
+import { ControlPanel } from './components/ControlPanel';
+import { MovementControls } from './components/MovementControls';
+import { DiagnosticsPanel } from './components/DiagnosticsPanel';
+import { Bot, Wifi, WifiOff } from 'lucide-react';
+
+function App() {
+  const [isActive, setIsActive] = useState(false);
+  const [battery, setBattery] = useState(85);
+  const [systemStatus, setSystemStatus] = useState('Standby');
+  const [lastAction, setLastAction] = useState('');
+  
+  const [parts, setParts] = useState({
+    head: false,
+    torso: false,
+    leftArm: false,
+    rightArm: false,
+    leftLeg: false,
+    rightLeg: false
+  });
+
+  // Simulate battery drain when active
+  useEffect(() => {
+    if (isActive) {
+      const interval = setInterval(() => {
+        setBattery(prev => Math.max(0, prev - 0.1));
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [isActive]);
+
+  // Update system status based on robot state
+  useEffect(() => {
+    if (!isActive) {
+      setSystemStatus('Offline');
+    } else {
+      const activeParts = Object.values(parts).filter(Boolean).length;
+      if (activeParts === 0) {
+        setSystemStatus('Online - Idle');
+      } else if (activeParts === Object.keys(parts).length) {
+        setSystemStatus('Fully Operational');
+      } else {
+        setSystemStatus('Partial Operation');
+      }
+    }
+  }, [isActive, parts]);
+
+  const handlePowerToggle = () => {
+    if (isActive) {
+      // Shutdown sequence
+      setParts({
+        head: false,
+        torso: false,
+        leftArm: false,
+        rightArm: false,
+        leftLeg: false,
+        rightLeg: false
+      });
+      setLastAction('System shutdown initiated');
+export default App;
